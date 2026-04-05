@@ -35,6 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  debug: true,
   events: {
     async createUser({ user }) {
       await prisma.profiles.create({
