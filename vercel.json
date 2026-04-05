@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/daily-reminders",
-      "schedule": "0 * * * *"
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/weekly-reports",
-      "schedule": "0 8 * * 1"
+      "schedule": "0 9 * * 1"
     },
     {
       "path": "/api/cron/achievement-check",
