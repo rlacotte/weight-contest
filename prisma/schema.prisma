@@ -1,0 +1,371 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model accounts {
+  id                  String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id             String  @db.Uuid
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  users               users   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([provider, provider_account_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model achievements {
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug              String              @unique
+  name              String
+  description       String
+  icon              String
+  category          String
+  xp_reward         Int                 @default(10)
+  rarity            String              @default("common")
+  condition         Json                @default("{}")
+  sort_order        Int                 @default(0)
+  user_achievements user_achievements[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model activity_feed {
+  id            String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String      @db.Uuid
+  contest_id    String?     @db.Uuid
+  activity_type String
+  data          Json        @default("{}")
+  visibility    String      @default("contest")
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  contests      contests?   @relation(fields: [contest_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  comments      comments[]
+  reactions     reactions[]
+
+  @@index([contest_id, created_at(sort: Desc)], map: "idx_activity_feed_contest")
+  @@index([user_id, created_at(sort: Desc)], map: "idx_activity_feed_user")
+}
+
+model comments {
+  id            String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String        @db.Uuid
+  activity_id   String        @db.Uuid
+  body          String
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  activity_feed activity_feed @relation(fields: [activity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([activity_id, created_at], map: "idx_comments_activity")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model contest_bets {
+  id                       String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  contest_id               String   @db.Uuid
+  user_id                  String   @db.Uuid
+  amount_cents             Int
+  status                   String   @default("pending")
+  stripe_payment_intent_id String?
+  stripe_transfer_id       String?
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  contests                 contests @relation(fields: [contest_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                    users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([contest_id, user_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model contest_members {
+  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  contest_id        String   @db.Uuid
+  user_id           String   @db.Uuid
+  role              String   @default("member")
+  status            String   @default("pending")
+  starting_weight   Decimal? @db.Decimal
+  starting_body_fat Decimal? @db.Decimal
+  goal_weight       Decimal? @db.Decimal
+  team_name         String?
+  joined_at         DateTime @default(now()) @db.Timestamptz(6)
+  contests          contests @relation(fields: [contest_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users             users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([contest_id, user_id])
+  @@index([contest_id], map: "idx_contest_members_contest")
+  @@index([user_id], map: "idx_contest_members_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model contests {
+  id                            String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  creator_id                    String              @db.Uuid
+  name                          String
+  description                   String?
+  contest_type                  String              @default("weight_loss_pct")
+  custom_metric_name            String?
+  custom_metric_unit            String?
+  start_date                    DateTime            @db.Timestamptz(6)
+  end_date                      DateTime            @db.Timestamptz(6)
+  weigh_in_frequency            String              @default("weekly")
+  weigh_in_day                  Int?
+  rules                         String?
+  invite_code                   String              @unique @default(dbgenerated("encode(gen_random_bytes(6), 'hex'::text)"))
+  is_public                     Boolean             @default(false)
+  max_members                   Int?
+  entry_fee_cents               Int                 @default(0)
+  prize_distribution            String              @default("winner_takes_all")
+  penalty_missed_weigh_in_cents Int                 @default(0)
+  has_photo_proof               Boolean             @default(false)
+  status                        String              @default("draft")
+  milestones                    Json                @default("[]")
+  created_at                    DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime            @default(now()) @db.Timestamptz(6)
+  activity_feed                 activity_feed[]
+  contest_bets                  contest_bets[]
+  contest_members               contest_members[]
+  users                         users               @relation(fields: [creator_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  conversations                 conversations[]
+  user_achievements             user_achievements[]
+  weekly_reports                weekly_reports[]
+  weigh_ins                     weigh_ins[]
+
+  @@index([creator_id], map: "idx_contests_creator")
+  @@index([invite_code], map: "idx_contests_invite_code")
+  @@index([status], map: "idx_contests_status")
+}
+
+model conversation_participants {
+  id              String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  conversation_id String        @db.Uuid
+  user_id         String        @db.Uuid
+  last_read_at    DateTime?     @db.Timestamptz(6)
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([conversation_id, user_id])
+  @@index([user_id], map: "idx_conv_participants_user")
+}
+
+model conversations {
+  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  contest_id                String?                     @db.Uuid
+  is_group                  Boolean                     @default(false)
+  name                      String?
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  conversation_participants conversation_participants[]
+  contests                  contests?                   @relation(fields: [contest_id], references: [id], onUpdate: NoAction)
+  messages                  messages[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model health_integrations {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String    @db.Uuid
+  provider         String
+  access_token     String
+  refresh_token    String?
+  token_expires_at DateTime? @db.Timestamptz(6)
+  last_sync_at     DateTime? @db.Timestamptz(6)
+  sync_enabled     Boolean   @default(true)
+  metadata         Json      @default("{}")
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, provider])
+}
+
+model messages {
+  id              String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  conversation_id String        @db.Uuid
+  sender_id       String        @db.Uuid
+  body            String
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users         @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([conversation_id, created_at(sort: Desc)], map: "idx_messages_conversation")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model notifications {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String   @db.Uuid
+  type       String
+  title      String
+  body       String
+  data       Json     @default("{}")
+  read       Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_notifications_unread", where: raw("(read = false)"))
+  @@index([user_id, created_at(sort: Desc)], map: "idx_notifications_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model profiles {
+  id                           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                      String    @unique @db.Uuid
+  full_name                    String?
+  avatar_url                   String?
+  height_cm                    Decimal?  @db.Decimal
+  starting_weight              Decimal?  @db.Decimal
+  goal_weight                  Decimal?  @db.Decimal
+  units_weight                 String    @default("kg")
+  units_height                 String    @default("cm")
+  date_of_birth                DateTime? @db.Date
+  gender                       String?
+  timezone                     String    @default("UTC")
+  onboarding_completed         Boolean   @default(false)
+  xp_total                     Int       @default(0)
+  level                        Int       @default(0)
+  streak_current               Int       @default(0)
+  streak_longest               Int       @default(0)
+  streak_last_weigh_in         DateTime? @db.Date
+  privacy_hide_weight          Boolean   @default(false)
+  privacy_show_percentage_only Boolean   @default(false)
+  notification_weigh_in_time   DateTime? @db.Time(6)
+  notification_email_digest    Boolean   @default(true)
+  notification_achievements    Boolean   @default(true)
+  notification_social          Boolean   @default(true)
+  notification_leaderboard     Boolean   @default(true)
+  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime  @default(now()) @db.Timestamptz(6)
+  users                        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_profiles_user_id")
+}
+
+model reactions {
+  id            String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String        @db.Uuid
+  activity_id   String        @db.Uuid
+  emoji         String
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  activity_feed activity_feed @relation(fields: [activity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, activity_id, emoji])
+  @@index([activity_id], map: "idx_reactions_activity")
+}
+
+model sessions {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  session_token String   @unique
+  user_id       String   @db.Uuid
+  expires       DateTime @db.Timestamptz(6)
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user_achievements {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id        String       @db.Uuid
+  achievement_id String       @db.Uuid
+  contest_id     String?      @db.Uuid
+  earned_at      DateTime     @default(now()) @db.Timestamptz(6)
+  achievements   achievements @relation(fields: [achievement_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  contests       contests?    @relation(fields: [contest_id], references: [id], onUpdate: NoAction)
+  users          users        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, achievement_id])
+  @@index([user_id], map: "idx_user_achievements_user")
+}
+
+model users {
+  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                     String                      @unique
+  email_verified            DateTime?                   @db.Timestamptz(6)
+  name                      String?
+  image                     String?
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  accounts                  accounts[]
+  activity_feed             activity_feed[]
+  comments                  comments[]
+  contest_bets              contest_bets[]
+  contest_members           contest_members[]
+  contests                  contests[]
+  conversation_participants conversation_participants[]
+  health_integrations       health_integrations[]
+  messages                  messages[]
+  notifications             notifications[]
+  profiles                  profiles?
+  reactions                 reactions[]
+  sessions                  sessions[]
+  user_achievements         user_achievements[]
+  weekly_reports            weekly_reports[]
+  weigh_ins                 weigh_ins[]
+}
+
+model verification_tokens {
+  identifier String
+  token      String   @unique
+  expires    DateTime @db.Timestamptz(6)
+
+  @@unique([identifier, token])
+}
+
+model weekly_reports {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id           String    @db.Uuid
+  contest_id        String?   @db.Uuid
+  report_week       DateTime  @db.Date
+  weight_start      Decimal?  @db.Decimal
+  weight_end        Decimal?  @db.Decimal
+  weight_change     Decimal?  @db.Decimal
+  weigh_in_count    Int       @default(0)
+  streak_maintained Boolean   @default(false)
+  rank_in_contest   Int?
+  rank_change       Int?
+  ai_insights       String?
+  ai_motivation     String?
+  data              Json      @default("{}")
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  contests          contests? @relation(fields: [contest_id], references: [id], onUpdate: NoAction)
+  users             users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, contest_id, report_week])
+  @@index([user_id, report_week(sort: Desc)], map: "idx_weekly_reports_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model weigh_ins {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String    @db.Uuid
+  contest_id       String?   @db.Uuid
+  weight           Decimal   @db.Decimal
+  body_fat_pct     Decimal?  @db.Decimal
+  muscle_mass      Decimal?  @db.Decimal
+  water_pct        Decimal?  @db.Decimal
+  waist_cm         Decimal?  @db.Decimal
+  hip_cm           Decimal?  @db.Decimal
+  chest_cm         Decimal?  @db.Decimal
+  photo_url        String?
+  photo_privacy    String    @default("private")
+  notes            String?
+  source           String    @default("manual")
+  weighed_at       DateTime  @default(now()) @db.Timestamptz(6)
+  smoothed_weight  Decimal?  @db.Decimal
+  weight_change    Decimal?  @db.Decimal
+  total_change     Decimal?  @db.Decimal
+  total_change_pct Decimal?  @db.Decimal
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  contests         contests? @relation(fields: [contest_id], references: [id], onUpdate: NoAction)
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([contest_id], map: "idx_weigh_ins_contest")
+  @@index([user_id, weighed_at(sort: Desc)], map: "idx_weigh_ins_user_date")
+}
