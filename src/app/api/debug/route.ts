@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+// @ts-expect-error -- no types
 import nodemailer from "nodemailer";
 
 export async function GET() {
