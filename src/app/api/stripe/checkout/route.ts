@@ -3,7 +3,12 @@ import Stripe from "stripe";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "sk_test_placeholder") {
+    return null;
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -18,6 +23,9 @@ export async function POST(request: Request) {
     update: {},
     create: { contest_id: contestId, user_id: session.user.id, amount_cents: contest.entry_fee_cents, status: "pending" },
   });
+
+  const stripe = getStripe();
+  if (!stripe) return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
 
   const checkoutSession = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],

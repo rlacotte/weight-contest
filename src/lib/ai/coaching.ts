@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getAnthropic() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 interface CoachingContext {
   userName: string;
@@ -18,7 +20,7 @@ interface CoachingContext {
 }
 
 export async function generateWeeklyInsights(ctx: CoachingContext): Promise<string> {
-  const message = await anthropic.messages.create({
+  const message = await getAnthropic().messages.create({
     model: "claude-sonnet-4-5-20250514",
     max_tokens: 500,
     system: `You are a supportive, evidence-based weight management coach. Your tone is encouraging but honest. Keep responses concise (3-5 bullet points). Focus on:
@@ -52,7 +54,7 @@ export async function detectPlateau(weeklyChanges: number[]): Promise<boolean> {
 }
 
 export async function generateMotivation(ctx: CoachingContext): Promise<string> {
-  const message = await anthropic.messages.create({
+  const message = await getAnthropic().messages.create({
     model: "claude-sonnet-4-5-20250514",
     max_tokens: 200,
     system: `You are a motivational weight management coach. Generate a short, personal encouragement message (2-3 sentences). Be specific to the person's situation, not generic.`,
