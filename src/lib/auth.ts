@@ -8,8 +8,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     EmailProvider({
       server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT),
+        host: process.env.EMAIL_SERVER_HOST ?? "email-smtp.eu-west-3.amazonaws.com",
+        port: Number(process.env.EMAIL_SERVER_PORT ?? 465),
+        secure: true,
         auth: {
           user: process.env.EMAIL_SERVER_USER,
           pass: process.env.EMAIL_SERVER_PASSWORD,
@@ -36,7 +37,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async createUser({ user }) {
-      // Auto-create profile when user signs up
       await prisma.profiles.create({
         data: {
           user_id: user.id!,
