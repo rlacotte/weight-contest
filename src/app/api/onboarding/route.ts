@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   });
 
   // Also update user name
-  await prisma.users.update({
+  await prisma.user.update({
     where: { id: session.user.id },
     data: { name: full_name },
   });

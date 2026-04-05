@@ -8,7 +8,7 @@ export async function GET() {
 
   // Test DB
   try {
-    const count = await prisma.users.count();
+    const count = await prisma.user.count();
     results.db = { ok: true, userCount: count };
   } catch (e: any) {
     results.db = { ok: false, error: e.message };
