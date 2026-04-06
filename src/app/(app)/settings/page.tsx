@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { ConnectedDevices } from "@/components/settings/ConnectedDevices";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -59,6 +60,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between"><div><Label>Hide Exact Weight</Label><p className="text-xs text-muted-foreground">Others see only relative changes</p></div><Switch checked={hideWeight} onCheckedChange={setHideWeight} /></div>
         <div className="flex items-center justify-between"><div><Label>Show Percentage Only</Label><p className="text-xs text-muted-foreground">Display progress as %</p></div><Switch checked={showPctOnly} onCheckedChange={setShowPctOnly} /></div>
       </CardContent></Card>
+      <ConnectedDevices />
       <Card><CardHeader><CardTitle>Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
         <div className="flex items-center justify-between"><Label>Weekly Email Digest</Label><Switch checked={emailDigest} onCheckedChange={setEmailDigest} /></div>
         <div className="flex items-center justify-between"><Label>Achievements</Label><Switch checked={notifAchievements} onCheckedChange={setNotifAchievements} /></div>
