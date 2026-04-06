@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Scale,
   Trophy,
-  Users,
   MessageCircle,
   Award,
   Brain,
@@ -16,7 +15,6 @@ import {
   LogOut,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/database";
 
 const navItems = [
@@ -33,16 +31,15 @@ const bottomItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function AppSidebar({ profile }: { profile: Profile | null }) {
+export function SidebarContent({ profile }: { profile: Profile | null }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   async function handleSignOut() {
     await signOut({ callbackUrl: "/auth/login" });
   }
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:border-r lg:bg-card lg:min-h-screen">
+    <div className="flex flex-col h-full w-full">
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <Scale className="h-6 w-6 text-primary" />
         <span className="font-bold text-lg">WeightContest</span>
@@ -110,6 +107,14 @@ export function AppSidebar({ profile }: { profile: Profile | null }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+export function AppSidebar({ profile }: { profile: Profile | null }) {
+  return (
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:border-r lg:bg-card lg:min-h-screen">
+      <SidebarContent profile={profile} />
     </aside>
   );
 }

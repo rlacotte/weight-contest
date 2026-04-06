@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Bell, Scale, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { AppSidebar } from "./AppSidebar";
+import { SidebarContent } from "./AppSidebar";
 import type { Profile } from "@/types/database";
 
 export function TopBar({
@@ -23,7 +23,7 @@ export function TopBar({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
-          <AppSidebar profile={profile} />
+          <SidebarContent profile={profile} />
         </SheetContent>
       </Sheet>
 
