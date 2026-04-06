@@ -104,7 +104,11 @@ export async function POST(request: Request) {
       user_id: userId,
       contest_id: input.contest_id ?? null,
       activity_type: "weigh_in",
-      data: { weight: input.weight, weight_change: weightChange, total_change_pct: totalChangePct, streak: newStreak },
+      data: {
+        index_value: startingWeight && startingWeight > 0 ? Math.round((input.weight / startingWeight) * 1000) / 10 : 100,
+        change_pct: totalChangePct ? Math.round(totalChangePct * 10) / 10 : null,
+        streak: newStreak,
+      },
       visibility: input.contest_id ? "contest" : "private",
     },
   });

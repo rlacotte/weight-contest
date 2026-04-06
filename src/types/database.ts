@@ -256,6 +256,8 @@ export interface LeaderboardEntry {
   profile: Profile;
   metric_value: number;
   metric_label: string;
+  index_value: number; // base 100 (starting weight = 100)
+  index_label: string; // e.g. "95.2" means -4.8%
   last_weigh_in: string | null;
   streak: number;
   momentum: "up" | "down" | "flat";

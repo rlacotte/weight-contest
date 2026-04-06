@@ -53,7 +53,9 @@ export function LeaderboardPreview({ contestId }: { contestId: string }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold">{entry.metric_label}</span>
+            <span className={`text-sm font-bold tabular-nums ${entry.index_value <= 100 ? "text-green-600" : "text-red-600"}`}>
+              {entry.index_value?.toFixed(1) ?? "100.0"}
+            </span>
             {entry.momentum === "down" ? (
               <TrendingDown className="h-4 w-4 text-green-500" />
             ) : entry.momentum === "up" ? (

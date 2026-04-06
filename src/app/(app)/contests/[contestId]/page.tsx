@@ -89,7 +89,8 @@ export default async function ContestDashboardPage({
                     <div>
                       <p>
                         <strong>{activity.users?.profiles?.full_name ?? "Someone"}</strong>{" "}
-                        {activity.activity_type === "weigh_in" && "logged a weigh-in"}
+                        {activity.activity_type === "weigh_in" &&
+                          `weighed in at index ${(activity.data as any)?.index_value?.toFixed?.(1) ?? "—"}`}
                         {activity.activity_type === "joined_contest" && "joined the contest"}
                         {activity.activity_type === "achievement" && `earned a badge`}
                       </p>

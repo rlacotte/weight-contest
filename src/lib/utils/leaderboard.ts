@@ -21,29 +21,39 @@ export function calculateRankings(
       let metricValue: number;
       let metricLabel: string;
 
+      // All contest types use % loss as the public metric (never exposes real weights)
+      const pctLoss = ((startWeight - currentWeight) / startWeight) * 100;
+
       switch (contestType) {
         case "weight_loss_pct":
-          metricValue = ((startWeight - currentWeight) / startWeight) * 100;
-          metricLabel = `${metricValue.toFixed(1)}%`;
+          metricValue = pctLoss;
+          metricLabel = `${pctLoss >= 0 ? "-" : "+"}${Math.abs(pctLoss).toFixed(1)}%`;
           break;
         case "absolute_weight_loss":
+          // Ranked by absolute loss but displayed as % to protect privacy
           metricValue = startWeight - currentWeight;
-          metricLabel = `${metricValue.toFixed(1)} kg`;
+          metricLabel = `${pctLoss >= 0 ? "-" : "+"}${Math.abs(pctLoss).toFixed(1)}%`;
           break;
         case "body_fat_pct":
           metricValue =
             (m.member.starting_body_fat ?? 0) -
             (m.weighIns[0]?.body_fat_pct ?? m.member.starting_body_fat ?? 0);
-          metricLabel = `${metricValue.toFixed(1)}%`;
+          metricLabel = `${metricValue >= 0 ? "-" : "+"}${Math.abs(metricValue).toFixed(1)}% BF`;
           break;
         case "custom":
-          metricValue = startWeight - currentWeight;
-          metricLabel = `${metricValue.toFixed(1)} ${customMetricName ?? ""}`;
+          metricValue = pctLoss;
+          metricLabel = `${pctLoss >= 0 ? "-" : "+"}${Math.abs(pctLoss).toFixed(1)}%`;
           break;
         default:
           metricValue = 0;
           metricLabel = "N/A";
       }
+
+      // Base 100 index: starting weight = 100, current weight = ratio * 100
+      const indexValue = startWeight > 0
+        ? Math.round((currentWeight / startWeight) * 1000) / 10
+        : 100;
+      const indexLabel = indexValue.toFixed(1);
 
       const momentum = calculateMomentum(m.weighIns);
       const trendPoints = m.weighIns.slice(-7);
@@ -58,6 +68,8 @@ export function calculateRankings(
         profile: m.profile,
         metric_value: metricValue,
         metric_label: metricLabel,
+        index_value: indexValue,
+        index_label: indexLabel,
         last_weigh_in: m.weighIns[0]?.weighed_at ?? null,
         streak: m.profile.streak_current,
         momentum,
