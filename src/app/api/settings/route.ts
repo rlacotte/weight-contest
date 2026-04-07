@@ -29,6 +29,10 @@ export async function PUT(request: Request) {
   await prisma.profiles.update({
     where: { user_id: session.user.id },
     data: {
+      full_name: body.full_name,
+      height_cm: body.height_cm,
+      starting_weight: body.starting_weight,
+      goal_weight: body.goal_weight,
       units_weight: body.units_weight,
       units_height: body.units_height,
       privacy_hide_weight: body.privacy_hide_weight,

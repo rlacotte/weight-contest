@@ -1,12 +1,14 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatWeight, formatHeight, calculateBMI, getBMICategory, fromKg } from "@/lib/utils/weight";
 import { calculateLevel } from "@/lib/constants";
 import { format } from "date-fns";
-import { Scale, Flame, Award, Target } from "lucide-react";
+import { Scale, Flame, Award, Target, UserIcon } from "lucide-react";
 import type { WeightUnit, HeightUnit } from "@/types/database";
 
 export default async function ProfilePage() {
@@ -35,6 +37,14 @@ export default async function ProfilePage() {
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary text-primary-foreground text-3xl font-bold mb-4">{profile.full_name?.charAt(0)?.toUpperCase() ?? "?"}</div>
         <h1 className="text-2xl font-bold">{profile.full_name}</h1>
         <div className="flex items-center justify-center gap-2 mt-2"><Badge>Level {levelInfo.level}</Badge><Badge variant="outline">{profile.xp_total} XP</Badge></div>
+        <div className="mt-4">
+          <Link href="/profile/edit">
+            <Button variant="outline" size="sm">
+              <UserIcon className="mr-2 h-4 w-4" />
+              Modifier le profil
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
