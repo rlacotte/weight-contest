@@ -49,28 +49,71 @@ export async function POST(request: Request) {
     ? ((input.weight - startingWeight) / startingWeight) * 100
     : null;
 
-  const weighIn = await prisma.weigh_ins.create({
-    data: {
-      user_id: userId,
-      contest_id: input.contest_id ?? null,
-      weight: input.weight,
-      body_fat_pct: input.body_fat_pct ?? null,
-      muscle_mass: input.muscle_mass ?? null,
-      water_pct: input.water_pct ?? null,
-      waist_cm: input.waist_cm ?? null,
-      hip_cm: input.hip_cm ?? null,
-      chest_cm: input.chest_cm ?? null,
-      photo_url: input.photo_url ?? null,
-      photo_privacy: input.photo_privacy,
-      notes: input.notes ?? null,
-      source: input.source,
-      weighed_at: input.weighed_at ?? new Date().toISOString(),
-      smoothed_weight: smoothedWeight,
-      weight_change: weightChange,
-      total_change: totalChange,
-      total_change_pct: totalChangePct,
-    },
-  });
+  // Find all active contests the user is in if no contest_id is provided
+  let contestIds: string[] = input.contest_id ? [input.contest_id] : [];
+  
+  if (!input.contest_id) {
+    const activeMemberships = await prisma.contest_members.findMany({
+      where: {
+        user_id: userId,
+        status: "approved",
+        contests: {
+          status: "active",
+          start_date: { lte: new Date() },
+          end_date: { gte: new Date() }
+        }
+      },
+      select: { contest_id: true }
+    });
+    contestIds = activeMemberships.map(m => m.contest_id);
+  }
+
+  // Create the main weigh-ins (if any) or a generic one
+  const weighInRecords = contestIds.length > 0 
+    ? contestIds.map(cid => ({
+        user_id: userId,
+        contest_id: cid,
+        weight: input.weight,
+        body_fat_pct: input.body_fat_pct ?? null,
+        muscle_mass: input.muscle_mass ?? null,
+        water_pct: input.water_pct ?? null,
+        waist_cm: input.waist_cm ?? null,
+        hip_cm: input.hip_cm ?? null,
+        chest_cm: input.chest_cm ?? null,
+        photo_url: input.photo_url ?? null,
+        photo_privacy: input.photo_privacy,
+        notes: input.notes ?? null,
+        source: input.source,
+        weighed_at: input.weighed_at ?? new Date().toISOString(),
+        smoothed_weight: smoothedWeight,
+        weight_change: weightChange,
+        total_change: totalChange,
+        total_change_pct: totalChangePct,
+      }))
+    : [{
+        user_id: userId,
+        contest_id: null,
+        weight: input.weight,
+        body_fat_pct: input.body_fat_pct ?? null,
+        muscle_mass: input.muscle_mass ?? null,
+        water_pct: input.water_pct ?? null,
+        waist_cm: input.waist_cm ?? null,
+        hip_cm: input.hip_cm ?? null,
+        chest_cm: input.chest_cm ?? null,
+        photo_url: input.photo_url ?? null,
+        photo_privacy: input.photo_privacy,
+        notes: input.notes ?? null,
+        source: input.source,
+        weighed_at: input.weighed_at ?? new Date().toISOString(),
+        smoothed_weight: smoothedWeight,
+        weight_change: weightChange,
+        total_change: totalChange,
+        total_change_pct: totalChangePct,
+      }];
+
+  const [weighIn] = await Promise.all(
+    weighInRecords.map(data => prisma.weigh_ins.create({ data }))
+  );
 
   // Update streak
   const today = new Date().toISOString().split("T")[0];
@@ -99,19 +142,23 @@ export async function POST(request: Request) {
   }
 
   // Activity feed
-  await prisma.activity_feed.create({
-    data: {
-      user_id: userId,
-      contest_id: input.contest_id ?? null,
-      activity_type: "weigh_in",
-      data: {
-        index_value: startingWeight && startingWeight > 0 ? Math.round((input.weight / startingWeight) * 1000) / 10 : 100,
-        change_pct: totalChangePct ? Math.round(totalChangePct * 10) / 10 : null,
-        streak: newStreak,
-      },
-      visibility: input.contest_id ? "contest" : "private",
-    },
-  });
+  await Promise.all(
+    (contestIds.length > 0 ? contestIds : [null]).map(cid => 
+      prisma.activity_feed.create({
+        data: {
+          user_id: userId,
+          contest_id: cid,
+          activity_type: "weigh_in",
+          data: {
+            index_value: startingWeight && startingWeight > 0 ? Math.round((input.weight / startingWeight) * 1000) / 10 : 100,
+            change_pct: totalChangePct ? Math.round(totalChangePct * 10) / 10 : null,
+            streak: newStreak,
+          },
+          visibility: cid ? "contest" : "private",
+        },
+      })
+    )
+  );
 
   return NextResponse.json({ weighIn, newStreak, newAchievements: [] });
 }
