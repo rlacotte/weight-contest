@@ -45,7 +45,7 @@ export default async function ContestDashboardPage({
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{contest.name}</h1>
             {(() => {
-              const status = getNormalizedStatus(contest);
+              const status = getNormalizedStatus(contest, prisma as any);
               return (
                 <Badge className={
                   status === "active" ? "bg-green-100 text-green-800" : 

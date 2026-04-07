@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users, Calendar, Trophy } from "lucide-react";
 import { format } from "date-fns";
+import { getNormalizedStatus } from "@/lib/utils/contest";
 
 const statusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-800",
@@ -28,6 +29,7 @@ export default async function ContestsPage() {
 
   const contests = memberships.map((m) => ({
     ...m.contests,
+    status: getNormalizedStatus(m.contests, prisma as any),
     user_role: m.role,
     user_status: m.status,
   }));

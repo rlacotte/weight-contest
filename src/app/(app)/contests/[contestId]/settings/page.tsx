@@ -32,7 +32,7 @@ export default async function ContestSettingsPage({ params }: { params: Promise<
         <CardContent className="space-y-3">
           <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{contest.name}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Invite Code</span><span className="font-mono font-bold">{contest.invite_code}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge>{getNormalizedStatus(contest)}</Badge></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge>{getNormalizedStatus(contest, prisma as any)}</Badge></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Dates</span><span>{format(contest.start_date, "MMM dd")} - {format(contest.end_date, "MMM dd, yyyy")}</span></div>
         </CardContent>
       </Card>

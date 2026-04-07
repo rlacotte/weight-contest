@@ -75,7 +75,7 @@ export async function GET() {
 
   const result = memberships.map((m) => ({
     ...m.contests,
-    status: getNormalizedStatus(m.contests),
+    status: getNormalizedStatus(m.contests, prisma as any),
     start_date: m.contests.start_date.toISOString(),
     end_date: m.contests.end_date.toISOString(),
     created_at: m.contests.created_at.toISOString(),
