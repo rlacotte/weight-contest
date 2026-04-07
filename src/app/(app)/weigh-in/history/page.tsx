@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { DeleteWeighInButton } from "@/components/weigh-in/DeleteWeighInButton";
 
 export default async function WeighInHistoryPage() {
   const session = await auth();
@@ -35,6 +36,7 @@ export default async function WeighInHistoryPage() {
                 <TableHead>Change</TableHead>
                 <TableHead>Body Fat</TableHead>
                 <TableHead>Source</TableHead>
+                <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -52,11 +54,14 @@ export default async function WeighInHistoryPage() {
                     </TableCell>
                     <TableCell>{w.body_fat_pct ? `${Number(w.body_fat_pct)}%` : "-"}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{w.source}</Badge></TableCell>
+                    <TableCell>
+                      <DeleteWeighInButton id={w.id} />
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">No weigh-ins yet</TableCell>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">No weigh-ins yet</TableCell>
                 </TableRow>
               )}
             </TableBody>
