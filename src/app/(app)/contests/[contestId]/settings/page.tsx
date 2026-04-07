@@ -4,6 +4,7 @@ import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { getNormalizedStatus } from "@/lib/utils/contest";
 
 export default async function ContestSettingsPage({ params }: { params: Promise<{ contestId: string }> }) {
   const { contestId } = await params;
@@ -31,7 +32,7 @@ export default async function ContestSettingsPage({ params }: { params: Promise<
         <CardContent className="space-y-3">
           <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{contest.name}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Invite Code</span><span className="font-mono font-bold">{contest.invite_code}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge>{contest.status}</Badge></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge>{getNormalizedStatus(contest)}</Badge></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Dates</span><span>{format(contest.start_date, "MMM dd")} - {format(contest.end_date, "MMM dd, yyyy")}</span></div>
         </CardContent>
       </Card>
