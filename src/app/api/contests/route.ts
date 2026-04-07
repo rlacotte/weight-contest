@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createContestSchema } from "@/lib/validators/contest";
+import { getNormalizedStatus } from "@/lib/utils/contest";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -74,6 +75,7 @@ export async function GET() {
 
   const result = memberships.map((m) => ({
     ...m.contests,
+    status: getNormalizedStatus(m.contests),
     start_date: m.contests.start_date.toISOString(),
     end_date: m.contests.end_date.toISOString(),
     created_at: m.contests.created_at.toISOString(),

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Scale, Settings } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { LeaderboardPreview } from "@/components/leaderboard/LeaderboardPreview";
+import { getNormalizedStatus } from "@/lib/utils/contest";
 
 export default async function ContestDashboardPage({
   params,
@@ -43,7 +44,18 @@ export default async function ContestDashboardPage({
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{contest.name}</h1>
-            <Badge className={contest.status === "active" ? "bg-green-100 text-green-800" : contest.status === "upcoming" ? "bg-blue-100 text-blue-800" : ""}>{contest.status}</Badge>
+            {(() => {
+              const status = getNormalizedStatus(contest);
+              return (
+                <Badge className={
+                  status === "active" ? "bg-green-100 text-green-800" : 
+                  status === "upcoming" ? "bg-blue-100 text-blue-800" : 
+                  "bg-gray-100 text-gray-800"
+                }>
+                  {status}
+                </Badge>
+              );
+            })()}
           </div>
           {contest.description && <p className="text-muted-foreground mt-1">{contest.description}</p>}
         </div>
