@@ -41,8 +41,10 @@ export function SidebarContent({ profile }: { profile: Profile | null }) {
   return (
     <div className="flex flex-col h-full w-full">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <Scale className="h-6 w-6 text-primary" />
-        <span className="font-bold text-lg">WeightContest</span>
+        <span className="text-2xl">🏋️</span>
+        <span className="font-extrabold text-lg bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+          WeightContest
+        </span>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">

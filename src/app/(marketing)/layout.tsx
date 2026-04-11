@@ -1,22 +1,25 @@
 import Link from "next/link";
-import { Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <Scale className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg">WeightContest</span>
+            <span className="text-2xl">🏋️</span>
+            <span className="font-extrabold text-lg bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              WeightContest
+            </span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link href="/auth/login">
               <Button variant="ghost">Sign In</Button>
             </Link>
             <Link href="/auth/login">
-              <Button>Get Started</Button>
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 border-0 shadow-md shadow-purple-500/20">
+                Get Started
+              </Button>
             </Link>
           </div>
         </div>
@@ -24,7 +27,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       {children}
       <footer className="border-t bg-card mt-auto">
         <div className="container mx-auto py-8 px-4 text-center text-sm text-muted-foreground">
-          WeightContest - The most complete weight contest platform.
+          <span className="mr-1">🏋️</span> WeightContest — Compete. Track. Win.
         </div>
       </footer>
     </div>

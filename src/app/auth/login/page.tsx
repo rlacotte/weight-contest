@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Scale, Mail, Loader2, CheckCircle2 } from "lucide-react";
+import { Mail, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,29 +28,57 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 p-4">
       <div className="w-full max-w-md">
-        <Card>
+        <Card className="shadow-xl shadow-purple-500/10 border-0">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary"><Scale className="h-7 w-7 text-primary-foreground" /></div>
-            <CardTitle className="text-2xl">Weight Contest</CardTitle>
-            <CardDescription>{sent ? "Check your email for the magic link" : "Sign in with your email to get started"}</CardDescription>
+            <div className="text-5xl mb-2">🏋️</div>
+            <CardTitle className="text-2xl bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              WeightContest
+            </CardTitle>
+            <CardDescription>
+              {sent ? "Check your inbox! 📬" : "Enter your email. No password needed."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {sent ? (
               <div className="flex flex-col items-center gap-4 py-4">
-                <CheckCircle2 className="h-12 w-12 text-green-500" />
-                <p className="text-center text-muted-foreground">We sent a magic link to <strong>{email}</strong>.</p>
-                <Button variant="ghost" onClick={() => setSent(false)}>Use a different email</Button>
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                </div>
+                <p className="text-center text-muted-foreground">
+                  Magic link sent to <strong>{email}</strong>. Click it to jump in.
+                </p>
+                <Button variant="ghost" onClick={() => setSent(false)}>
+                  Use a different email
+                </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="pl-10" /></div>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send Magic Link</Button>
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 border-0 shadow-md shadow-purple-500/20"
+                  disabled={loading}
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  🚀 Send Magic Link
+                </Button>
               </form>
             )}
           </CardContent>
