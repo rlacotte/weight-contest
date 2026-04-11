@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Scale, Settings } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { LeaderboardPreview } from "@/components/leaderboard/LeaderboardPreview";
+import { ContestIndexChart } from "@/components/charts/ContestIndexChart";
 import { getNormalizedStatus } from "@/lib/utils/contest";
 
 export default async function ContestDashboardPage({
@@ -78,6 +79,8 @@ export default async function ContestDashboardPage({
           <p className="text-sm text-muted-foreground">Share this code with friends</p>
         </CardContent>
       </Card>
+
+      <ContestIndexChart contestId={contestId} />
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>

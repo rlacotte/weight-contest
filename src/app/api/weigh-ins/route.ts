@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { weighInSchema } from "@/lib/validators/weigh-in";
 import { calculateEWMA } from "@/lib/utils/trend";
+import { checkAndAwardAchievements } from "@/lib/utils/achievements";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -144,7 +145,18 @@ export async function POST(request: Request) {
     ),
   ]);
 
-  return NextResponse.json({ weighIn, newStreak, newAchievements: [] });
+  // Check achievements
+  const newAchievements = await checkAndAwardAchievements(userId);
+
+  return NextResponse.json({
+    weighIn,
+    newStreak,
+    newAchievements: newAchievements.map((a) => ({
+      name: a.name,
+      icon: a.icon,
+      rarity: a.rarity,
+    })),
+  });
 }
 
 export async function GET(request: Request) {
