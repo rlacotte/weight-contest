@@ -13,11 +13,14 @@ export function calculateRankings(
   contestType: ContestType,
   customMetricName?: string | null
 ): LeaderboardEntry[] {
-  const entries: LeaderboardEntry[] = membersData
-    .filter((m) => m.member.status === "approved" && m.member.starting_weight && m.latestWeight)
+  const entries = membersData
+    .filter((m) => m.member.status === "approved" && m.weighIns.length > 0)
     .map((m) => {
-      const startWeight = m.member.starting_weight!;
-      const currentWeight = m.latestWeight!;
+      // Use member's starting_weight if set, otherwise fall back to first weigh-in
+      const firstWeighIn = m.weighIns[m.weighIns.length - 1]?.weight;
+      const startWeight = m.member.starting_weight ?? firstWeighIn ?? 0;
+      const currentWeight = m.latestWeight ?? startWeight;
+      if (startWeight === 0) return null;
       let metricValue: number;
       let metricLabel: string;
 
@@ -75,7 +78,8 @@ export function calculateRankings(
         momentum,
         momentum_value: momentumValue,
       };
-    });
+    })
+    .filter((e) => e !== null) as LeaderboardEntry[];
 
   entries.sort((a, b) => b.metric_value - a.metric_value);
   entries.forEach((entry, i) => {
