@@ -80,7 +80,7 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-6">
             <span>🎉</span> Free to use. No excuses.
           </div>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent font-heading">
             Lose Weight.
             <br />
             Win Bragging Rights.
@@ -131,7 +131,7 @@ export default function HomePage() {
       {/* How it works */}
       <section className="py-20 bg-gradient-to-b from-card to-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">Dead Simple</h2>
+          <h2 className="text-3xl font-bold font-heading text-center mb-4">Dead Simple</h2>
           <p className="text-center text-muted-foreground mb-12 max-w-lg mx-auto">
             Three steps. That&apos;s it. No PhD required.
           </p>
@@ -157,7 +157,7 @@ export default function HomePage() {
       <section id="features" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-3xl font-bold font-heading mb-4">
               Everything You Need to <span className="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Crush It</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -184,7 +184,7 @@ export default function HomePage() {
           <div className="relative rounded-3xl bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 p-12 text-center text-white overflow-hidden">
             <div className="absolute top-4 left-8 text-4xl opacity-30">🏆</div>
             <div className="absolute bottom-4 right-8 text-4xl opacity-30">💪</div>
-            <h2 className="text-3xl font-bold mb-4 relative">Ready to Prove Yourself?</h2>
+            <h2 className="text-3xl font-bold font-heading mb-4 relative">Ready to Prove Yourself?</h2>
             <p className="text-lg mb-8 max-w-xl mx-auto opacity-90 relative">
               Create your first contest. Invite your crew. Let the
               weigh-ins begin.
