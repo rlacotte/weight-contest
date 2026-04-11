@@ -31,15 +31,18 @@ const bottomItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function SidebarContent({ profile }: { profile: Profile | null }) {
+export function SidebarContent({ profile, onNavigate }: { profile: Profile | null; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   async function handleSignOut() {
+    onNavigate?.();
     await signOut({ callbackUrl: "/auth/login" });
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full" onClick={(e) => {
+      if ((e.target as HTMLElement).closest("a")) onNavigate?.();
+    }}>
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <span className="text-2xl">🏋️</span>
         <span className="font-extrabold text-lg bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">

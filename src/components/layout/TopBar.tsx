@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Bell, Scale, Menu } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SidebarContent } from "./AppSidebar";
@@ -14,16 +15,18 @@ export function TopBar({
   profile: Profile | null;
   unreadCount: number;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-card px-4 lg:px-6">
-      <Sheet>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger>
           <Button variant="ghost" size="icon" className="lg:hidden">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
-          <SidebarContent profile={profile} />
+          <SidebarContent profile={profile} onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
 
