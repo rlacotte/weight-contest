@@ -13,25 +13,17 @@ export default async function WeighInPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
 
-  const [profile, recentWeighIns, activeMembers] = await Promise.all([
+  const [profile, recentWeighIns] = await Promise.all([
     prisma.profiles.findUnique({ where: { user_id: session.user.id }, select: { units_weight: true } }),
     prisma.weigh_ins.findMany({
       where: { user_id: session.user.id },
       orderBy: { weighed_at: "desc" },
       take: 5,
     }),
-    prisma.contest_members.findMany({
-      where: { user_id: session.user.id, status: "approved" },
-      include: { contests: { select: { id: true, name: true, status: true } } },
-    }),
   ]);
 
   const units = (profile?.units_weight ?? "kg") as WeightUnit;
   const factor = units === "lbs" ? 2.20462 : 1;
-
-  const contests = activeMembers
-    .filter((m) => m.contests.status === "active")
-    .map((m) => m.contests as any);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -45,7 +37,7 @@ export default async function WeighInPage() {
         </Link>
       </div>
 
-      <WeighInForm units={units} contests={contests} />
+      <WeighInForm units={units} />
 
       {recentWeighIns.length > 0 && (
         <Card>

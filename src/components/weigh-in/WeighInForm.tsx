@@ -10,20 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Scale, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
-import type { WeightUnit, Contest } from "@/types/database";
+import type { WeightUnit } from "@/types/database";
 
 interface Props {
   units: WeightUnit;
-  contests?: Contest[];
 }
 
-export function WeighInForm({ units, contests }: Props) {
+export function WeighInForm({ units }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [weight, setWeight] = useState("");
-  const [contestId, setContestId] = useState<string | null>(null);
   const [bodyFatPct, setBodyFatPct] = useState("");
   const [waistCm, setWaistCm] = useState("");
   const [hipCm, setHipCm] = useState("");
@@ -44,7 +42,6 @@ export function WeighInForm({ units, contests }: Props) {
       source: "manual",
     };
 
-    if (contestId) payload.contest_id = contestId;
     if (bodyFatPct) payload.body_fat_pct = parseFloat(bodyFatPct);
     if (waistCm) payload.waist_cm = parseFloat(waistCm);
     if (hipCm) payload.hip_cm = parseFloat(hipCm);
@@ -117,24 +114,6 @@ export function WeighInForm({ units, contests }: Props) {
               className="text-2xl h-14 font-mono"
             />
           </div>
-
-          {contests && contests.length > 0 && (
-            <div className="space-y-2">
-              <Label>Contest (optional)</Label>
-              <select
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={contestId ?? ""}
-                onChange={(e) => setContestId(e.target.value || null)}
-              >
-                <option value="">Personal weigh-in</option>
-                {contests.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
           <button
             type="button"

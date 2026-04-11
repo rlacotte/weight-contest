@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const weighInSchema = z.object({
   weight: z.number().min(20).max(500),
-  contest_id: z.string().uuid().optional().nullable(),
   body_fat_pct: z.number().min(1).max(70).optional().nullable(),
   muscle_mass: z.number().min(10).max(200).optional().nullable(),
   water_pct: z.number().min(20).max(80).optional().nullable(),

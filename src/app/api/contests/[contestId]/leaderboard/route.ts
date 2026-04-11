@@ -28,7 +28,10 @@ export async function GET(
 
   const memberIds = members.map((m) => m.user_id);
   const weighIns = await prisma.weigh_ins.findMany({
-    where: { user_id: { in: memberIds } },
+    where: {
+      user_id: { in: memberIds },
+      weighed_at: { gte: contest.start_date, lte: contest.end_date },
+    },
     orderBy: { weighed_at: "desc" },
   });
 

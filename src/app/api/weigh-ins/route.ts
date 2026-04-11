@@ -45,75 +45,33 @@ export async function POST(request: Request) {
 
   const startingWeight = profile.starting_weight ? Number(profile.starting_weight) : null;
   const totalChange = startingWeight ? input.weight - startingWeight : null;
-  const totalChangePct = startingWeight && startingWeight > 0
-    ? ((input.weight - startingWeight) / startingWeight) * 100
-    : null;
+  const totalChangePct =
+    startingWeight && startingWeight > 0
+      ? ((input.weight - startingWeight) / startingWeight) * 100
+      : null;
 
-  // Find all active contests the user is in if no contest_id is provided
-  let contestIds: string[] = input.contest_id ? [input.contest_id] : [];
-  
-  if (!input.contest_id) {
-    const activeMemberships = await prisma.contest_members.findMany({
-      where: {
-        user_id: userId,
-        status: "approved",
-        contests: {
-          status: "active",
-          start_date: { lte: new Date() },
-          end_date: { gte: new Date() }
-        }
-      },
-      select: { contest_id: true }
-    });
-    contestIds = activeMemberships.map(m => m.contest_id);
-  }
-
-  // Create the main weigh-ins (if any) or a generic one
-  const weighInRecords = contestIds.length > 0 
-    ? contestIds.map(cid => ({
-        user_id: userId,
-        contest_id: cid,
-        weight: input.weight,
-        body_fat_pct: input.body_fat_pct ?? null,
-        muscle_mass: input.muscle_mass ?? null,
-        water_pct: input.water_pct ?? null,
-        waist_cm: input.waist_cm ?? null,
-        hip_cm: input.hip_cm ?? null,
-        chest_cm: input.chest_cm ?? null,
-        photo_url: input.photo_url ?? null,
-        photo_privacy: input.photo_privacy,
-        notes: input.notes ?? null,
-        source: input.source,
-        weighed_at: input.weighed_at ?? new Date().toISOString(),
-        smoothed_weight: smoothedWeight,
-        weight_change: weightChange,
-        total_change: totalChange,
-        total_change_pct: totalChangePct,
-      }))
-    : [{
-        user_id: userId,
-        contest_id: null,
-        weight: input.weight,
-        body_fat_pct: input.body_fat_pct ?? null,
-        muscle_mass: input.muscle_mass ?? null,
-        water_pct: input.water_pct ?? null,
-        waist_cm: input.waist_cm ?? null,
-        hip_cm: input.hip_cm ?? null,
-        chest_cm: input.chest_cm ?? null,
-        photo_url: input.photo_url ?? null,
-        photo_privacy: input.photo_privacy,
-        notes: input.notes ?? null,
-        source: input.source,
-        weighed_at: input.weighed_at ?? new Date().toISOString(),
-        smoothed_weight: smoothedWeight,
-        weight_change: weightChange,
-        total_change: totalChange,
-        total_change_pct: totalChangePct,
-      }];
-
-  const [weighIn] = await Promise.all(
-    weighInRecords.map(data => prisma.weigh_ins.create({ data }))
-  );
+  // Single weigh-in per measurement — no contest_id
+  const weighIn = await prisma.weigh_ins.create({
+    data: {
+      user_id: userId,
+      weight: input.weight,
+      body_fat_pct: input.body_fat_pct ?? null,
+      muscle_mass: input.muscle_mass ?? null,
+      water_pct: input.water_pct ?? null,
+      waist_cm: input.waist_cm ?? null,
+      hip_cm: input.hip_cm ?? null,
+      chest_cm: input.chest_cm ?? null,
+      photo_url: input.photo_url ?? null,
+      photo_privacy: input.photo_privacy,
+      notes: input.notes ?? null,
+      source: input.source,
+      weighed_at: input.weighed_at ?? new Date().toISOString(),
+      smoothed_weight: smoothedWeight,
+      weight_change: weightChange,
+      total_change: totalChange,
+      total_change_pct: totalChangePct,
+    },
+  });
 
   // Update streak
   const today = new Date().toISOString().split("T")[0];
@@ -141,9 +99,35 @@ export async function POST(request: Request) {
     });
   }
 
-  // Activity feed
-  await Promise.all(
-    (contestIds.length > 0 ? contestIds : [null]).map(cid => 
+  // Activity feed entries for each active contest + one private
+  const activeMemberships = await prisma.contest_members.findMany({
+    where: {
+      user_id: userId,
+      status: "approved",
+      contests: { status: "active", start_date: { lte: new Date() }, end_date: { gte: new Date() } },
+    },
+    select: { contest_id: true },
+  });
+
+  const feedContestIds = activeMemberships.map((m) => m.contest_id);
+
+  await Promise.all([
+    // Private activity
+    prisma.activity_feed.create({
+      data: {
+        user_id: userId,
+        contest_id: null,
+        activity_type: "weigh_in",
+        data: {
+          index_value: startingWeight && startingWeight > 0 ? Math.round((input.weight / startingWeight) * 1000) / 10 : 100,
+          change_pct: totalChangePct ? Math.round(totalChangePct * 10) / 10 : null,
+          streak: newStreak,
+        },
+        visibility: "private",
+      },
+    }),
+    // One activity per active contest
+    ...feedContestIds.map((cid) =>
       prisma.activity_feed.create({
         data: {
           user_id: userId,
@@ -154,11 +138,11 @@ export async function POST(request: Request) {
             change_pct: totalChangePct ? Math.round(totalChangePct * 10) / 10 : null,
             streak: newStreak,
           },
-          visibility: cid ? "contest" : "private",
+          visibility: "contest",
         },
       })
-    )
-  );
+    ),
+  ]);
 
   return NextResponse.json({ weighIn, newStreak, newAchievements: [] });
 }

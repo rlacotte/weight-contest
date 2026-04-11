@@ -9,19 +9,19 @@ datasource db {
 }
 
 model Account {
-  id                  String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  userId              String  @map("user_id") @db.Uuid
-  type                String
-  provider            String
-  providerAccountId   String  @map("provider_account_id")
-  refresh_token       String?
-  access_token        String?
-  expires_at          Int?
-  token_type          String?
-  scope               String?
-  id_token            String?
-  session_state       String?
-  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -140,7 +140,6 @@ model contests {
   conversations                 conversations[]
   user_achievements             user_achievements[]
   weekly_reports                weekly_reports[]
-  weigh_ins                     weigh_ins[]
 
   @@index([creator_id], map: "idx_contests_creator")
   @@index([invite_code], map: "idx_contests_invite_code")
@@ -264,11 +263,11 @@ model reactions {
 }
 
 model Session {
-  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  sessionToken  String   @unique @map("session_token")
-  userId        String   @map("user_id") @db.Uuid
-  expires       DateTime @db.Timestamptz(6)
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  expires      DateTime @db.Timestamptz(6)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("sessions")
 }
@@ -349,29 +348,26 @@ model weekly_reports {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model weigh_ins {
-  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id          String    @db.Uuid
-  contest_id       String?   @db.Uuid
-  weight           Decimal   @db.Decimal
-  body_fat_pct     Decimal?  @db.Decimal
-  muscle_mass      Decimal?  @db.Decimal
-  water_pct        Decimal?  @db.Decimal
-  waist_cm         Decimal?  @db.Decimal
-  hip_cm           Decimal?  @db.Decimal
-  chest_cm         Decimal?  @db.Decimal
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String   @db.Uuid
+  weight           Decimal  @db.Decimal
+  body_fat_pct     Decimal? @db.Decimal
+  muscle_mass      Decimal? @db.Decimal
+  water_pct        Decimal? @db.Decimal
+  waist_cm         Decimal? @db.Decimal
+  hip_cm           Decimal? @db.Decimal
+  chest_cm         Decimal? @db.Decimal
   photo_url        String?
-  photo_privacy    String    @default("private")
+  photo_privacy    String   @default("private")
   notes            String?
-  source           String    @default("manual")
-  weighed_at       DateTime  @default(now()) @db.Timestamptz(6)
-  smoothed_weight  Decimal?  @db.Decimal
-  weight_change    Decimal?  @db.Decimal
-  total_change     Decimal?  @db.Decimal
-  total_change_pct Decimal?  @db.Decimal
-  created_at       DateTime  @default(now()) @db.Timestamptz(6)
-  contests         contests? @relation(fields: [contest_id], references: [id], onUpdate: NoAction)
-  users            User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  source           String   @default("manual")
+  weighed_at       DateTime @default(now()) @db.Timestamptz(6)
+  smoothed_weight  Decimal? @db.Decimal
+  weight_change    Decimal? @db.Decimal
+  total_change     Decimal? @db.Decimal
+  total_change_pct Decimal? @db.Decimal
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  users            User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([contest_id], map: "idx_weigh_ins_contest")
   @@index([user_id, weighed_at(sort: Desc)], map: "idx_weigh_ins_user_date")
 }
